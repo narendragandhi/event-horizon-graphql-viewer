@@ -36,15 +36,15 @@ export const FilterPanel = ({ filters, onFiltersChange }: FilterPanelProps) => {
 
   const hasActiveFilters = 
     filters.dateRange !== 'all' || 
-    filters.location !== '' || 
-    filters.eventType !== '' ||
+    filters.location !== 'all-locations' || 
+    filters.eventType !== 'all-types' ||
     filters.searchQuery !== '';
 
   const clearFilters = () => {
     onFiltersChange({
       dateRange: 'all',
-      location: '',
-      eventType: '',
+      location: 'all-locations',
+      eventType: 'all-types',
       searchQuery: ''
     });
   };
@@ -107,7 +107,7 @@ export const FilterPanel = ({ filters, onFiltersChange }: FilterPanelProps) => {
               <SelectValue placeholder="All locations" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">All locations</SelectItem>
+              <SelectItem value="all-locations">All locations</SelectItem>
               {locations.map((location) => (
                 <SelectItem key={location} value={location}>
                   {location}
@@ -132,7 +132,7 @@ export const FilterPanel = ({ filters, onFiltersChange }: FilterPanelProps) => {
               <SelectValue placeholder="All types" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">All types</SelectItem>
+              <SelectItem value="all-types">All types</SelectItem>
               {eventTypes.map((type) => (
                 <SelectItem key={type} value={type}>
                   {type}
@@ -153,7 +153,7 @@ export const FilterPanel = ({ filters, onFiltersChange }: FilterPanelProps) => {
             onChange={(e) => 
               onFiltersChange({ 
                 ...filters, 
-                location: e.target.value ? `custom:${e.target.value}` : '' 
+                location: e.target.value ? `custom:${e.target.value}` : 'all-locations' 
               })
             }
           />
@@ -169,12 +169,12 @@ export const FilterPanel = ({ filters, onFiltersChange }: FilterPanelProps) => {
                 Date: {filters.dateRange.replace('-', ' ')}
               </Badge>
             )}
-            {filters.location && (
+            {filters.location && filters.location !== 'all-locations' && (
               <Badge variant="secondary">
                 Location: {filters.location.replace('custom:', '')}
               </Badge>
             )}
-            {filters.eventType && (
+            {filters.eventType && filters.eventType !== 'all-types' && (
               <Badge variant="secondary">
                 Type: {filters.eventType}
               </Badge>

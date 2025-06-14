@@ -10,8 +10,8 @@ import { EventFilters } from '@/types/event';
 const Index = () => {
   const [filters, setFilters] = useState<EventFilters>({
     dateRange: 'all',
-    location: '',
-    eventType: '',
+    location: 'all-locations',
+    eventType: 'all-types',
     searchQuery: ''
   });
   
