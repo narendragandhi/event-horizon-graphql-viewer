@@ -108,7 +108,7 @@ class MockGraphQLService {
 
     if (filters) {
       // Apply search filter
-      if (filters.searchQuery) {
+      if (filters.searchQuery && filters.searchQuery.trim() !== '') {
         const query = filters.searchQuery.toLowerCase();
         filteredEvents = filteredEvents.filter(event => 
           event.title.toLowerCase().includes(query) ||
@@ -117,25 +117,33 @@ class MockGraphQLService {
         );
       }
 
-      // Apply event type filter
-      if (filters.eventType) {
+      // Apply event type filter - only filter if not "all-types"
+      if (filters.eventType && filters.eventType !== 'all-types') {
         filteredEvents = filteredEvents.filter(event => 
           event.eventType === filters.eventType
         );
       }
 
-      // Apply location filter
-      if (filters.location) {
-        const location = filters.location.replace('custom:', '').toLowerCase();
-        filteredEvents = filteredEvents.filter(event => 
-          event.location.city.toLowerCase().includes(location) ||
-          event.location.country.toLowerCase().includes(location) ||
-          event.location.name.toLowerCase().includes(location)
-        );
+      // Apply location filter - only filter if not "all-locations"
+      if (filters.location && filters.location !== 'all-locations') {
+        if (filters.location.startsWith('custom:')) {
+          const customLocation = filters.location.replace('custom:', '').toLowerCase();
+          filteredEvents = filteredEvents.filter(event => 
+            event.location.city.toLowerCase().includes(customLocation) ||
+            event.location.country.toLowerCase().includes(customLocation) ||
+            event.location.name.toLowerCase().includes(customLocation)
+          );
+        } else {
+          // Filter by predefined location
+          filteredEvents = filteredEvents.filter(event => 
+            event.location.city === filters.location ||
+            event.location.country === filters.location
+          );
+        }
       }
 
       // Apply date range filter
-      if (filters.dateRange !== 'all') {
+      if (filters.dateRange && filters.dateRange !== 'all') {
         const now = new Date();
         const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
         
@@ -165,6 +173,7 @@ class MockGraphQLService {
     // Sort by date
     filteredEvents.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
+    console.log('Filtered events result:', filteredEvents.length, 'events found');
     return filteredEvents;
   }
 
