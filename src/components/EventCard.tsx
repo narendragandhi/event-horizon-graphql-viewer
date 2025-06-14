@@ -1,15 +1,17 @@
-
 import { Event } from '@/types/event';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
 import { CalendarIcon, MapPinIcon } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 interface EventCardProps {
   event: Event;
 }
 
 export const EventCard = ({ event }: EventCardProps) => {
+  const navigate = useNavigate();
+
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     return date.toLocaleDateString('en-US', {
@@ -27,6 +29,10 @@ export const EventCard = ({ event }: EventCardProps) => {
       minute: '2-digit',
       hour12: true
     });
+  };
+
+  const handleViewDetails = () => {
+    navigate(`/event/${event.id}`);
   };
 
   return (
@@ -101,7 +107,7 @@ export const EventCard = ({ event }: EventCardProps) => {
           <div className="text-xs text-gray-500">
             By {event.organizer}
           </div>
-          <Button size="sm" className="ml-auto">
+          <Button size="sm" className="ml-auto" onClick={handleViewDetails}>
             View Details
           </Button>
         </div>
