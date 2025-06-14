@@ -4,7 +4,12 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
-import { FilterIcon } from 'lucide-react';
+import { Calendar } from '@/components/ui/calendar';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { FilterIcon, CalendarIcon } from 'lucide-react';
+import { format } from 'date-fns';
+import { cn } from '@/lib/utils';
+import { useState } from 'react';
 
 interface FilterPanelProps {
   filters: EventFilters;
@@ -12,6 +17,9 @@ interface FilterPanelProps {
 }
 
 export const FilterPanel = ({ filters, onFiltersChange }: FilterPanelProps) => {
+  const [startDate, setStartDate] = useState<Date | undefined>();
+  const [endDate, setEndDate] = useState<Date | undefined>();
+
   const eventTypes = [
     'Conference',
     'Workshop',
@@ -47,6 +55,51 @@ export const FilterPanel = ({ filters, onFiltersChange }: FilterPanelProps) => {
       eventType: 'all-types',
       searchQuery: ''
     });
+    setStartDate(undefined);
+    setEndDate(undefined);
+  };
+
+  const handleDateRangeChange = (value: string) => {
+    if (value === 'custom') {
+      onFiltersChange({ 
+        ...filters, 
+        dateRange: 'custom',
+        customDateRange: startDate && endDate ? {
+          start: startDate.toISOString(),
+          end: endDate.toISOString()
+        } : undefined
+      });
+    } else {
+      onFiltersChange({ ...filters, dateRange: value as EventFilters['dateRange'] });
+    }
+  };
+
+  const handleStartDateSelect = (date: Date | undefined) => {
+    setStartDate(date);
+    if (date && endDate) {
+      onFiltersChange({
+        ...filters,
+        dateRange: 'custom',
+        customDateRange: {
+          start: date.toISOString(),
+          end: endDate.toISOString()
+        }
+      });
+    }
+  };
+
+  const handleEndDateSelect = (date: Date | undefined) => {
+    setEndDate(date);
+    if (startDate && date) {
+      onFiltersChange({
+        ...filters,
+        dateRange: 'custom',
+        customDateRange: {
+          start: startDate.toISOString(),
+          end: date.toISOString()
+        }
+      });
+    }
   };
 
   return (
@@ -76,9 +129,7 @@ export const FilterPanel = ({ filters, onFiltersChange }: FilterPanelProps) => {
           </label>
           <Select
             value={filters.dateRange}
-            onValueChange={(value) => 
-              onFiltersChange({ ...filters, dateRange: value as EventFilters['dateRange'] })
-            }
+            onValueChange={handleDateRangeChange}
           >
             <SelectTrigger>
               <SelectValue placeholder="Select date range" />
@@ -88,6 +139,7 @@ export const FilterPanel = ({ filters, onFiltersChange }: FilterPanelProps) => {
               <SelectItem value="today">Today</SelectItem>
               <SelectItem value="this-week">This week</SelectItem>
               <SelectItem value="this-month">This month</SelectItem>
+              <SelectItem value="custom">Custom range</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -160,13 +212,82 @@ export const FilterPanel = ({ filters, onFiltersChange }: FilterPanelProps) => {
         </div>
       </div>
 
+      {/* Custom Date Range Pickers */}
+      {filters.dateRange === 'custom' && (
+        <div className="mt-4 pt-4 border-t">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Start Date
+              </label>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className={cn(
+                      "w-full justify-start text-left font-normal",
+                      !startDate && "text-muted-foreground"
+                    )}
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {startDate ? format(startDate, "PPP") : <span>Pick start date</span>}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={startDate}
+                    onSelect={handleStartDateSelect}
+                    initialFocus
+                    className="p-3 pointer-events-auto"
+                  />
+                </PopoverContent>
+              </Popover>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                End Date
+              </label>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className={cn(
+                      "w-full justify-start text-left font-normal",
+                      !endDate && "text-muted-foreground"
+                    )}
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {endDate ? format(endDate, "PPP") : <span>Pick end date</span>}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={endDate}
+                    onSelect={handleEndDateSelect}
+                    initialFocus
+                    disabled={(date) => startDate ? date < startDate : false}
+                    className="p-3 pointer-events-auto"
+                  />
+                </PopoverContent>
+              </Popover>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Active Filters Display */}
       {hasActiveFilters && (
         <div className="mt-4 pt-4 border-t">
           <div className="flex flex-wrap gap-2">
             {filters.dateRange !== 'all' && (
               <Badge variant="secondary">
-                Date: {filters.dateRange.replace('-', ' ')}
+                Date: {filters.dateRange === 'custom' 
+                  ? `${startDate ? format(startDate, 'MMM dd') : 'Start'} - ${endDate ? format(endDate, 'MMM dd') : 'End'}`
+                  : filters.dateRange.replace('-', ' ')
+                }
               </Badge>
             )}
             {filters.location && filters.location !== 'all-locations' && (
