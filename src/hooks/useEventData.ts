@@ -1,7 +1,6 @@
-
 import { useState, useEffect } from 'react';
 import { Event, EventFilters } from '@/types/event';
-import { mockGraphQLService } from '@/services/mockGraphQLService';
+import { eventService } from '../services/eventService';
 
 export const useEventData = (filters: EventFilters) => {
   const [events, setEvents] = useState<Event[]>([]);
@@ -17,7 +16,7 @@ export const useEventData = (filters: EventFilters) => {
         // Simulate API delay
         await new Promise(resolve => setTimeout(resolve, 800));
         
-        const data = await mockGraphQLService.fetchEvents(filters);
+        const data = await eventService.getEvents(filters);
         setEvents(data);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to fetch events');
