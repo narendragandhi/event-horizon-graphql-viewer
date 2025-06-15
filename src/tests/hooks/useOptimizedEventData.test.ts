@@ -1,5 +1,5 @@
 
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useOptimizedEventData } from '@/hooks/useOptimizedEventData';
@@ -71,7 +71,7 @@ describe('useOptimizedEventData', () => {
     });
 
     expect(result.current.data).toEqual(mockEvents);
-    const expectedCacheKey = `events-${JSON.stringify(filters)}`;
+    const expectedCacheKey = 'events-' + JSON.stringify(filters);
     expect(cacheService.get).toHaveBeenCalledWith(expectedCacheKey);
     expect(mockGraphQLService.fetchEvents).not.toHaveBeenCalled();
   });
@@ -100,7 +100,7 @@ describe('useOptimizedEventData', () => {
 
     expect(result.current.data).toEqual(mockEvents);
     expect(mockGraphQLService.fetchEvents).toHaveBeenCalledWith(filters);
-    const expectedCacheKey = `events-${JSON.stringify(filters)}`;
+    const expectedCacheKey = 'events-' + JSON.stringify(filters);
     expect(cacheService.set).toHaveBeenCalledWith(expectedCacheKey, mockEvents);
   });
 
@@ -175,8 +175,8 @@ describe('useOptimizedEventData', () => {
 
     rerender({ filters: filters2 });
 
-    const expectedCacheKey1 = `events-${JSON.stringify(filters1)}`;
-    const expectedCacheKey2 = `events-${JSON.stringify(filters2)}`;
+    const expectedCacheKey1 = 'events-' + JSON.stringify(filters1);
+    const expectedCacheKey2 = 'events-' + JSON.stringify(filters2);
     expect(cacheService.get).toHaveBeenCalledWith(expectedCacheKey1);
     expect(cacheService.get).toHaveBeenCalledWith(expectedCacheKey2);
   });
