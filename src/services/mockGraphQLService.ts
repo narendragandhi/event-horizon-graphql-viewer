@@ -177,6 +177,33 @@ class MockGraphQLService {
     return filteredEvents;
   }
 
+  // Add the missing getEvents method that eventService expects
+  async getEvents(filters?: {
+    category?: string;
+    location?: string;
+    dateRange?: { start: string; end: string };
+    searchTerm?: string;
+  }): Promise<Event[]> {
+    // Transform the GraphQL-style filters to EventFilters format for fetchEvents
+    const eventFilters: EventFilters = {
+      dateRange: 'all',
+      location: filters?.location || 'all-locations',
+      eventType: filters?.category || 'all-types',
+      searchQuery: filters?.searchTerm || ''
+    };
+
+    return this.fetchEvents(eventFilters);
+  }
+
+  // Add the missing getEventById method
+  async getEventById(id: string): Promise<Event | null> {
+    console.log('Fetching event by ID:', id);
+    
+    // Find event in mock data
+    const event = mockEvents.find(e => e.id === id);
+    return event || null;
+  }
+
   // Example GraphQL query that would be used with AEM
   getGraphQLQuery() {
     return `
