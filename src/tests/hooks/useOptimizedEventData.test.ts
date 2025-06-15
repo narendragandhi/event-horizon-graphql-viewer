@@ -36,11 +36,13 @@ const createWrapper = () => {
     },
   });
   
-  function wrapper({ children }: { children: ReactNode }) {
-    return <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>;
-  }
-  
-  return wrapper;
+  return function TestWrapper({ children }: { children: ReactNode }) {
+    return (
+      <QueryClientProvider client={queryClient}>
+        {children}
+      </QueryClientProvider>
+    );
+  };
 };
 
 describe('useOptimizedEventData', () => {
