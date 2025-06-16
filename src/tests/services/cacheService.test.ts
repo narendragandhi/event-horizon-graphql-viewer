@@ -1,5 +1,4 @@
-
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
 import { cacheService } from '@/services/cacheService';
 
 describe('CacheService', () => {
